@@ -31,7 +31,7 @@ public class Member {
     private String email;
 
     @Column(name = "phoneNumber")
-    private int phoneNumber;
+    private String phoneNumber;
 
     @Column(name = "memberType")
     private String memberType;
@@ -43,7 +43,7 @@ public class Member {
     private List<Borrow>borrows;
 
 
-    public Member(int memberID, String lastName, String firstName, String middleName, String extensionName, String email, int phoneNumber, String memberType, List<Attendance> attendances, List<Borrow> borrows) {
+    public Member(int memberID, String lastName, String firstName, String middleName, String extensionName, String email, String phoneNumber, String memberType, List<Attendance> attendances, List<Borrow> borrows) {
         this.memberID = memberID;
         this.lastName = lastName;
         this.firstName = firstName;
@@ -72,7 +72,7 @@ public class Member {
         return middleName;
     }
 
-    public int getPhoneNumber() {
+    public String getPhoneNumber() {
         return phoneNumber;
     }
 
@@ -124,7 +124,7 @@ public class Member {
         this.email = email;
     }
 
-    public void setPhoneNumber(int phoneNumber) {
+    public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
     }
 
