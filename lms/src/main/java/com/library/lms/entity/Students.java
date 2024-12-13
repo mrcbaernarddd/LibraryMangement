@@ -7,8 +7,6 @@ import lombok.Setter;
 
 
 @Data
-@Getter
-@Setter
 @Entity
 @Table(name = "students")
 public class Students {

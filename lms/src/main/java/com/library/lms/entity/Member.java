@@ -42,6 +42,12 @@ public class Member {
     @OneToMany(mappedBy = "memberI")
     private List<Borrow>borrows;
 
+    @OneToOne(mappedBy = "member", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Students student;
+
+    @OneToOne(mappedBy = "member", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Staff staff;
+
 
     public Member(int memberID, String lastName, String firstName, String middleName, String extensionName, String email, String phoneNumber, String memberType, List<Attendance> attendances, List<Borrow> borrows) {
         this.memberID = memberID;
@@ -54,6 +60,10 @@ public class Member {
         this.memberType = memberType;
         this.attendances = attendances;
         this.borrows = borrows;
+    }
+
+    public Member() {
+
     }
 
     public int getMemberID() {

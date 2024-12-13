@@ -2,7 +2,10 @@ package com.library.lms.entity;
 
 
 import jakarta.persistence.*;
+import lombok.Builder;
+import lombok.Data;
 
+@Data
 @Entity
 @Table(name = "staff")
 public class Staff {
@@ -13,9 +16,13 @@ public class Staff {
 
     private String position;
     private String shift;
-    private String staff;
+    private String staffStatus;
 
     @OneToOne
     @JoinColumn(name = "members_memberID", referencedColumnName = "memberID")
     private Member memberI;
+
+    public Staff() {
+
+    }
 }
