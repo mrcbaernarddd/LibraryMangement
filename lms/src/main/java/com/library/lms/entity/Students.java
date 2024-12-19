@@ -11,11 +11,9 @@ import lombok.Setter;
 @Table(name = "students")
 public class Students {
 
+    //private int studentID;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int studentID;
-
     @Column(name = "schoolStudentID")
     private int schoolStudentID;
 
@@ -29,6 +27,6 @@ public class Students {
     private String department;
 
     @OneToOne
-    @JoinColumn(name = "members_memberID", referencedColumnName = "memberID")
+    @JoinColumn(name = "members_memberID", nullable = false)
     private Member memberI;
 }

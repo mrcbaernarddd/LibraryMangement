@@ -1,65 +1,63 @@
 package com.library.lms.controller;
 
 
+import com.library.lms.DTO.MemberDetailsDTO;
 import com.library.lms.DTO.MemberRequest;
 import com.library.lms.entity.Member;
+import com.library.lms.entity.Staff;
+import com.library.lms.entity.Students;
 import com.library.lms.service.MemberService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
+
 
 @RestController
-@RequestMapping("/members")
+@RequestMapping("api/members")
 public class MemberController {
-    private final MemberService memberService;
+
 
     @Autowired
-    public MemberController(MemberService memberService){
+    private final MemberService memberService;
+
+    public MemberController(MemberService memberService) {
         this.memberService = memberService;
     }
 
+
     @PostMapping
-    public Member addMember(@RequestBody MemberRequest memberRequest){
+    public Member createMember(@RequestBody Member member){
+        member = memberService.createMember(member);
+        return member;
+    }
 
-        Member member = memberRequest.getMember();
+    @PostMapping("/{memberId}/staff")
+    public Staff createStaff(@PathVariable Integer memberId, @RequestBody Staff staff){
+        return memberService.createStaff(memberId, staff);
+    }
 
-        if ("student".equalsIgnoreCase(member.getMemberType())){
-            return memberService.saveMember(member, memberRequest.getStudentRequest());
-        } else if ("staff".equalsIgnoreCase(member.getMemberType())) {
-            return memberService.saveMember(member, memberRequest.getStaffRequest());
-        } else {
-            throw new IllegalArgumentException("Invalid member type.");
-        }
+    @PostMapping("/{memberId}/student")
+    public ResponseEntity<Students> createStudent(
+            @PathVariable Integer memberId,
+            @RequestBody Students student) {
+        Students savedStudent = memberService.createStudent(memberId, student);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedStudent);
     }
 
     @GetMapping
-    public List<Member> getAllMember(){
-        return memberService.getAllMember();
+    public List<MemberRequest> getAllMember(){
+        return memberService.getAllMembers()
+                .stream()
+                .map(MemberRequest::fromEntity)
+                .collect(Collectors.toList());
     }
 
-    @GetMapping("/{id}")
-    public MemberRequest getMemberByID(@PathVariable int id){
-        return memberService.getMemberByID(id)
-                .map(member -> {
-                    MemberRequest memreq = new MemberRequest();
-                    memreq.getMember().setMemberID(member.getMemberID());
-                    memreq.getMember().setLastName(member.getLastName());
-                    memreq.getMember().setFirstName(member.getFirstName());
-                    memreq.getMember().setMemberType(member.getMemberType());
-
-                    if ("student".equalsIgnoreCase(member.getMemberType())&& member.getStudent() != null){
-                        memreq.getMember().getStudent().setSchoolStudentID(member.getStudent().getSchoolStudentID());
-                        memreq.getMember().getStudent().setCourse(member.getStudent().getCourse());
-                        memreq.getMember().getStudent().setYearLevel(member.getStudent().getYearLevel());
-                        memreq.getMember().getStudent().setDepartment(member.getStudent().getDepartment());
-                    } else if ("staff".equalsIgnoreCase(member.getMemberType()) && member.getStaff() != null) {
-                        memreq.getMember().getStaff().setPosition(member.getStaff().getPosition());
-                        memreq.getMember().getStaff().setStaffStatus(member.getStaff().getStaffStatus());
-                        memreq.getMember().getStaff().setShift(member.getStaff().getShift());
-                    }
-                    return memreq;
-                })
-                .orElse(null);
+    @GetMapping("/{memberId}")
+    public MemberDetailsDTO getMemberById(@PathVariable Integer memberId) {
+        return memberService.getMemberDetails(memberId);
     }
 }

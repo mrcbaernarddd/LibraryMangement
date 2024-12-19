@@ -10,4 +10,4 @@ public class LmsApplication {
 		SpringApplication.run(LmsApplication.class, args);
 	}
 
-}
+}   

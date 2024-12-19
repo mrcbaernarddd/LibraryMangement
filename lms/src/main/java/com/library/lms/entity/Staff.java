@@ -19,7 +19,7 @@ public class Staff {
     private String staffStatus;
 
     @OneToOne
-    @JoinColumn(name = "members_memberID", referencedColumnName = "memberID")
+    @JoinColumn(name = "members_memberID", nullable = false)
     private Member memberI;
 
     public Staff() {

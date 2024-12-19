@@ -1,10 +1,16 @@
 package com.library.lms.entity;
 
 import jakarta.persistence.*;
+import lombok.Builder;
+import lombok.Data;
 
-import java.sql.Time;
-import java.util.Date;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+
+
+@Data
+@Builder
 @Entity
 @Table(name = "attendance")
 public class Attendance {
@@ -14,11 +20,25 @@ public class Attendance {
     private int attendanceID;
 
     @ManyToOne
-    @JoinColumn(name = "memberID")
+    @JoinColumn(name = "memberID", referencedColumnName = "memberID")
     private Member memberI;
 
-    private Date date;
-    private Time timeIn;
-    private Time timeOut;
+    private LocalDate date;
+    private LocalTime timeIn;
+    private LocalTime timeOut;
     private String purpose;
+
+    // Default constructor
+    public Attendance() {
+        // This can be empty or you can initialize any default values if necessary.
+    }
+
+    public Attendance(int attendanceID, Member memberI, LocalDate date, LocalTime timeIn, LocalTime timeOut, String purpose) {
+        this.attendanceID = attendanceID;
+        this.memberI = memberI;
+        this.date = date;
+        this.timeIn = timeIn;
+        this.timeOut = timeOut;
+        this.purpose = purpose;
+    }
 }

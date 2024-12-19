@@ -1,88 +1,88 @@
 package com.library.lms.service;
 
-
-import com.library.lms.DTO.StaffMemberRequest;
-import com.library.lms.DTO.StudentMemberRequest;
+import com.library.lms.DTO.MemberDetailsDTO;
+import com.library.lms.DTO.StaffMemberDTO;
+import com.library.lms.DTO.StudentMemberDTO;
 import com.library.lms.entity.Member;
 import com.library.lms.entity.Staff;
 import com.library.lms.entity.Students;
 import com.library.lms.repository.MemberRepository;
 import com.library.lms.repository.StaffRepository;
 import com.library.lms.repository.StudentRepository;
+import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
+@Data
+@Component
 @Service
 public class MemberService {
-    private final MemberRepository memberRepository;
-    private final StudentRepository studentRepository;
-    private final StaffRepository staffRepository;
 
     @Autowired
-    public MemberService(MemberRepository memberRepository, StudentRepository studentRepository, StaffRepository staffRepository){
-        this.memberRepository = memberRepository;
-        this.studentRepository = studentRepository;
-        this.staffRepository = staffRepository;
-    }
+    private MemberRepository memberRepository;
 
-    public Member saveMember(Member member, Object memberRequest){
-        //member
-        member.setFirstName(member.getFirstName());
-        member.setLastName(member.getLastName());
-        member.setMiddleName(member.getMiddleName());
-        member.setExtensionName(member.getExtensionName());
-        member.setEmail(member.getEmail());
-        member.setPhoneNumber(member.getPhoneNumber());
-        member.setMemberType(member.getMemberType());
-        Member savedMember = memberRepository.save(member);
+    @Autowired
+    private StudentRepository studentRepository;
 
-        //if student
-        if (member.getMemberType().equalsIgnoreCase("student")){
-            if (memberRequest instanceof StudentMemberRequest studentRequest) {
-                Students student = new Students();
+    @Autowired
+    private StaffRepository staffRepository;
 
-                student.setMemberI(member);
-                student.setSchoolStudentID(studentRequest.getSchoolStudentID());
-                student.setCourse(studentRequest.getCourse());
-                student.setYearLevel(studentRequest.getYearLevel());
 
-                studentRepository.save(student);
-            }
-            else {
-                throw new IllegalArgumentException("Invalid request type for student.");
-            }
-        } else if (member.getMemberType().equalsIgnoreCase("staff")) {
-            if (memberRequest instanceof StaffMemberRequest staffRequest){
-                Staff staff = new Staff();
-
-                staff.setMemberI(member);
-                staff.setPosition(staffRequest.getPosition());
-                staff.setShift(staffRequest.getShift());
-                staff.setStaffStatus(staff.getStaffStatus());
-
-                staffRepository.save(staff);
-            }
-        }
-
-        return  savedMember;
-    }
-
-    public Optional<Member> getMemberByID(Integer id){
-        return memberRepository.findById(id).map(member -> {
-            if (member.getMemberType().equalsIgnoreCase("student") && member.getStudent() != null){
-                member.setStudent(studentRepository.findByMemberId(member.getMemberID()));
-            } else if (member.getMemberType().equalsIgnoreCase("staff")) {
-                member.setStaff(staffRepository.findMemberId(member.getMemberID()));
-            }
-            return member;
-        });
-    }
-
-    public List<Member> getAllMember(){
+    public List<Member> getAllMembers(){
         return memberRepository.findAll();
     }
+
+    public Member getByMemberId(Integer id){
+        return memberRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Member not found"));
+    }
+
+    public Member createMember(Member member){
+        return memberRepository.save(member);
+    }
+
+    public Staff createStaff(Integer memberId, Staff staff){
+        Member member = getByMemberId(memberId);
+        staff.setMemberI(member);
+        return staffRepository.save(staff);
+    }
+
+    public MemberDetailsDTO getMemberDetails(Integer memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new RuntimeException("Member not found"));
+
+        MemberDetailsDTO detailsDTO = MemberDetailsDTO.fromEntity(member);
+
+        // Fetch staff or student details based on memberType
+        if ("Staff".equalsIgnoreCase(member.getMemberType())) {
+            Staff staff = staffRepository.findById(memberId)
+                    .orElseThrow(() -> new RuntimeException("Staff details not found"));
+            detailsDTO.setStaffDetails(StaffMemberDTO.fromEntity(staff));
+        } else if ("Student".equalsIgnoreCase(member.getMemberType())) {
+            Students student = studentRepository.findByMemberId(memberId)
+                    .orElseThrow(() -> new RuntimeException("Student details not found"));
+            detailsDTO.setStudentDetails(StudentMemberDTO.fromEntity(student));
+        }
+
+        return detailsDTO;
+    }
+
+
+    public Students createStudent(Integer memberId, Students student) {
+        // Validate that the primary key is unique
+        if (studentRepository.existsById(student.getSchoolStudentID())) {
+            throw new IllegalArgumentException("Student ID already exists.");
+        }
+
+        Member member = getByMemberId(memberId);
+        student.setMemberI(member);
+
+        // Save student with custom primary key
+        return studentRepository.save(student);
+    }
+
 
 }
