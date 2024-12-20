@@ -2,9 +2,11 @@ package com.library.lms.entity;
 
 
 import jakarta.persistence.*;
+import lombok.Data;
 
 import java.sql.Date;
 
+@Data
 @Entity
 @Table(name = "borrows")
 public class Borrow {
@@ -14,10 +16,8 @@ public class Borrow {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int borrowID;
 
-    private String field;
     private Date borrowDate;
     private Date dueDate;
-    private String status;
 
     @ManyToOne
     @JoinColumn(name = "members_memberID")
@@ -25,6 +25,16 @@ public class Borrow {
 
 
     @ManyToOne
-    @JoinColumn(name = "books_bookID")
-    private Book bookI;
+    @JoinColumn(name = "bookID")
+    private Books books;
+
+    public Borrow(){}
+
+    public Borrow(int borrowID, Date borrowDate, Date dueDate, Member memberI, Books books) {
+        this.borrowID = borrowID;
+        this.borrowDate = borrowDate;
+        this.dueDate = dueDate;
+        this.memberI = memberI;
+        this.books = books;
+    }
 }
